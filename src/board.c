@@ -38,5 +38,5 @@ Board *board_alloc(int nb_white_pieces, int nb_black_pieces) {
 void board_free(Board *board) {
 	free(board->white_pieces);
 	free(board->black_pieces);
-	free_board(board);
+	free(board);
 }
