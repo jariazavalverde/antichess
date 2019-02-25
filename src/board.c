@@ -20,8 +20,8 @@
   **/
 Board *board_alloc(int nb_white_pieces, int nb_black_pieces) {
 	Board *board = malloc(sizeof(Board));
-	board->white_pieces = malloc(nb_white_pieces*sizeof(int));
-	board->black_pieces = malloc(nb_black_pieces*sizeof(int));
+	board->white_pieces = malloc(nb_white_pieces*sizeof(short));
+	board->black_pieces = malloc(nb_black_pieces*sizeof(short));
 	board->nb_white_pieces = nb_white_pieces;
 	board->nb_black_pieces = nb_black_pieces;
 	board->movement = 0;
@@ -41,8 +41,16 @@ void board_free(Board *board) {
 	free(board);
 }
 
-int *board_pieces_to_array(Board *board) {
-	int i, j, k, piece, *array = malloc(64*sizeof(int));
+/**
+  *
+  * This function transforms the arrays of pieces of a board
+  * into an array of 64 cells, returning a pointer to a newly
+  * initialized array of 64 integers.
+  *  
+  **/
+short *board_pieces_to_array(Board *board) {
+	int i, j, k;
+	short piece, *array = malloc(64*sizeof(int));
 	for(i = 0; i < 8; i++) {
 		for(j = 0; j < 8; j++) {
 			for(k = 0; k < board->nb_white_pieces; k++) {
@@ -117,37 +125,17 @@ Board *board_new_game() {
   *
   * This function prints a board for the standard output. 
   * 
-  */
+  **/
 void board_print(Board *board) {
-	int i, j, piece, *array;
-	array = board_pieces_to_array(board);
+	int i, j;
+	short *pieces;
+	pieces = board_pieces_to_array(board);
 	for(i = 0; i < 8; i++) {
 		for(j = 0; j < 8; j++) {
 			printf(" |");
-			piece = array[i*8+j];
-			if(piece == -1) {
-				printf(" ");
-			} else if(piece_decode_color(piece) == COLOR_WHITE) {
-				switch(piece_decode_type(piece)) {
-					case PIECE_PAWN: printf("\u2659"); break;
-					case PIECE_KNIGHT: printf("\u2658"); break;
-					case PIECE_BISHOP: printf("\u2657"); break;
-					case PIECE_ROOK: printf("\u2656"); break;
-					case PIECE_QUEEN: printf("\u2655"); break;
-					case PIECE_KING: printf("\u2654"); break;
-				}
-			} else {
-				switch(piece_decode_type(piece)) {
-					case PIECE_PAWN: printf("\u265F"); break;
-					case PIECE_KNIGHT: printf("\u265E"); break;
-					case PIECE_BISHOP: printf("\u265D"); break;
-					case PIECE_ROOK: printf("\u265C"); break;
-					case PIECE_QUEEN: printf("\u265B"); break;
-					case PIECE_KING: printf("\u265A"); break;
-				}
-			}
+			piece_print(pieces[i*8+j]);
 		}
 		printf(" |\n");
 	}
-	free(array);
+	free(pieces);
 }

@@ -31,42 +31,42 @@ typedef enum Column {COL_A, COL_B, COL_C, COL_D, COL_E, COL_F, COL_G, COL_H} Col
 /**
   *
   * This function encodes a piece composed by
-  * (type, row, column) as a 32-bits integer.
+  * (type, row, column) as a integer.
   * 
-  */
-int piece_encode(Piece type, Row row, Column col, Color color);
+  **/
+short piece_encode(Piece type, Row row, Column col, Color color);
 
 /**
   *
   * This function returns the type of the piece.
   * 
-  */
-Piece piece_decode_type(int piece);
+  **/
+Piece piece_decode_type(short piece);
 
 /**
   *
   * This function returns the row of the piece.
   * 
-  */
-Row piece_decode_row(int piece);
+  **/
+Row piece_decode_row(short piece);
 
 /**
   *
   * This function returns the column of the piece.
   * 
-  */
-Column piece_decode_column(int piece);
+  **/
+Column piece_decode_column(short piece);
 
 /**
   *
   * This function returns the color of the piece.
   * 
-  */
-Color piece_decode_color(int piece);
+  **/
+Color piece_decode_color(short piece);
 
 /**
   *
   * This function prints a piece for the standard output. 
   * 
-  */
-void piece_print(int piece);
+  **/
+void piece_print(short piece);

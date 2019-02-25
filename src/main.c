@@ -17,5 +17,6 @@
 int main(int argc, char **argv) {
 	Board *board = board_new_game();
 	board_print(board);
+	free(board);
 	return 0;
 }

@@ -18,10 +18,10 @@
 #define ANTICHESS_BOARD_H
 
 typedef struct Board {
-	int *white_pieces;
-	int *black_pieces;
-	int nb_white_pieces;
-	int nb_black_pieces;
+	short *white_pieces;
+	short *black_pieces;
+	short nb_white_pieces;
+	short nb_black_pieces;
 	int movement;
 	Color turn;
 } Board;
@@ -47,6 +47,15 @@ Board *board_alloc(int nb_white_pieces, int nb_black_pieces);
 void board_free(Board *board);
 
 /**
+  *
+  * This function transforms the arrays of pieces of a board
+  * into an array of 64 cells, returning a pointer to a newly
+  * initialized array of 64 integers.
+  *  
+  **/
+short *board_pieces_to_array(Board *board);
+
+/**
   * 
   * This function creates a board, returning a pointer
   * to a newly initialized Board struct with pieces of
@@ -59,5 +68,5 @@ Board *board_new_game();
   *
   * This function prints a board for the standard output. 
   * 
-  */
+  **/
 void board_print(Board *board);
