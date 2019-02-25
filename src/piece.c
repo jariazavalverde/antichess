@@ -18,8 +18,8 @@
   * (type, row, column) as a 32-bits integer.
   * 
   */
-int piece_encode(Piece type, Row row, Column col) {
-	return type | (row << 8) | (col << 16);
+int piece_encode(Piece type, Row row, Column col, Color color) {
+	return type | (row << 8) | (col << 16) | (color << 24);
 }
 
 /**
@@ -47,6 +47,15 @@ Row piece_decode_row(int piece) {
   */
 Column piece_decode_column(int piece) {
 	return (piece >> 16) & 0xFF;
+}
+
+/**
+  *
+  * This function returns the color of the piece.
+  * 
+  */
+Color piece_decode_color(int piece) {
+  return (piece >> 24) & 0xFF;
 }
 
 /**

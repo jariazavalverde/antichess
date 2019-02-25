@@ -17,8 +17,6 @@
 #ifndef ANTICHESS_BOARD_H
 #define ANTICHESS_BOARD_H
 
-typedef enum Color {COLOR_WHITE, COLOR_BLACK} Color;
-
 typedef struct Board {
 	int *white_pieces;
 	int *black_pieces;

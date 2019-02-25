@@ -41,6 +41,33 @@ void board_free(Board *board) {
 	free(board);
 }
 
+int *board_pieces_to_array(Board *board) {
+	int i, j, k, piece, *array = malloc(64*sizeof(int));
+	for(i = 0; i < 8; i++) {
+		for(j = 0; j < 8; j++) {
+			for(k = 0; k < board->nb_white_pieces; k++) {
+				piece = board->white_pieces[k];
+				if(7 - i == piece_decode_row(piece) && j == piece_decode_column(piece)) {
+					array[i*8+j] = piece;
+					break;
+				}
+			}
+			if(k == board->nb_white_pieces) {
+				for(k = 0; k < board->nb_black_pieces; k++) {
+					piece = board->black_pieces[k];
+					if(7 - i == piece_decode_row(piece) && j == piece_decode_column(piece)) {
+						array[i*8+j] = piece;
+						break;
+					}
+				}
+			}
+			if(k == board->nb_black_pieces)
+				array[i*8+j] = -1;
+		}
+	}
+	return array;
+}
+
 /**
   * 
   * This function creates a board, returning a pointer
@@ -51,38 +78,38 @@ void board_free(Board *board) {
 Board *board_new_game() {
 	int i;
 	Board *board = board_alloc(16, 16);
-	board->white_pieces[0] = piece_encode(PIECE_ROOK, ROW_1, COL_A);
-	board->white_pieces[1] = piece_encode(PIECE_KNIGHT, ROW_1, COL_B);
-	board->white_pieces[2] = piece_encode(PIECE_BISHOP, ROW_1, COL_C);
-	board->white_pieces[3] = piece_encode(PIECE_QUEEN, ROW_1, COL_D);
-	board->white_pieces[4] = piece_encode(PIECE_KING, ROW_1, COL_E);
-	board->white_pieces[5] = piece_encode(PIECE_BISHOP, ROW_1, COL_F);
-	board->white_pieces[6] = piece_encode(PIECE_KNIGHT, ROW_1, COL_G);
-	board->white_pieces[7] = piece_encode(PIECE_ROOK, ROW_1, COL_H);
-	board->white_pieces[8] = piece_encode(PIECE_PAWN, ROW_2, COL_A);
-	board->white_pieces[9] = piece_encode(PIECE_PAWN, ROW_2, COL_B);
-	board->white_pieces[10] = piece_encode(PIECE_PAWN, ROW_2, COL_C);
-	board->white_pieces[11] = piece_encode(PIECE_PAWN, ROW_2, COL_D);
-	board->white_pieces[12] = piece_encode(PIECE_PAWN, ROW_2, COL_E);
-	board->white_pieces[13] = piece_encode(PIECE_PAWN, ROW_2, COL_F);
-	board->white_pieces[14] = piece_encode(PIECE_PAWN, ROW_2, COL_G);
-	board->white_pieces[15] = piece_encode(PIECE_PAWN, ROW_2, COL_H);
-	board->black_pieces[0] = piece_encode(PIECE_ROOK, ROW_8, COL_A);
-	board->black_pieces[1] = piece_encode(PIECE_KNIGHT, ROW_8, COL_B);
-	board->black_pieces[2] = piece_encode(PIECE_BISHOP, ROW_8, COL_C);
-	board->black_pieces[3] = piece_encode(PIECE_QUEEN, ROW_8, COL_D);
-	board->black_pieces[4] = piece_encode(PIECE_KING, ROW_8, COL_E);
-	board->black_pieces[5] = piece_encode(PIECE_BISHOP, ROW_8, COL_F);
-	board->black_pieces[6] = piece_encode(PIECE_KNIGHT, ROW_8, COL_G);
-	board->black_pieces[7] = piece_encode(PIECE_ROOK, ROW_8, COL_H);
-	board->black_pieces[8] = piece_encode(PIECE_PAWN, ROW_7, COL_A);
-	board->black_pieces[9] = piece_encode(PIECE_PAWN, ROW_7, COL_B);
-	board->black_pieces[10] = piece_encode(PIECE_PAWN, ROW_7, COL_C);
-	board->black_pieces[11] = piece_encode(PIECE_PAWN, ROW_7, COL_D);
-	board->black_pieces[12] = piece_encode(PIECE_PAWN, ROW_7, COL_E);
-	board->black_pieces[13] = piece_encode(PIECE_PAWN, ROW_7, COL_F);
-	board->black_pieces[14] = piece_encode(PIECE_PAWN, ROW_7, COL_G);
-	board->black_pieces[15] = piece_encode(PIECE_PAWN, ROW_7, COL_H);
+	board->white_pieces[0] = piece_encode(PIECE_ROOK, ROW_1, COL_A, COLOR_WHITE);
+	board->white_pieces[1] = piece_encode(PIECE_KNIGHT, ROW_1, COL_B, COLOR_WHITE);
+	board->white_pieces[2] = piece_encode(PIECE_BISHOP, ROW_1, COL_C, COLOR_WHITE);
+	board->white_pieces[3] = piece_encode(PIECE_QUEEN, ROW_1, COL_D, COLOR_WHITE);
+	board->white_pieces[4] = piece_encode(PIECE_KING, ROW_1, COL_E, COLOR_WHITE);
+	board->white_pieces[5] = piece_encode(PIECE_BISHOP, ROW_1, COL_F, COLOR_WHITE);
+	board->white_pieces[6] = piece_encode(PIECE_KNIGHT, ROW_1, COL_G, COLOR_WHITE);
+	board->white_pieces[7] = piece_encode(PIECE_ROOK, ROW_1, COL_H, COLOR_WHITE);
+	board->white_pieces[8] = piece_encode(PIECE_PAWN, ROW_2, COL_A, COLOR_WHITE);
+	board->white_pieces[9] = piece_encode(PIECE_PAWN, ROW_2, COL_B, COLOR_WHITE);
+	board->white_pieces[10] = piece_encode(PIECE_PAWN, ROW_2, COL_C, COLOR_WHITE);
+	board->white_pieces[11] = piece_encode(PIECE_PAWN, ROW_2, COL_D, COLOR_WHITE);
+	board->white_pieces[12] = piece_encode(PIECE_PAWN, ROW_2, COL_E, COLOR_WHITE);
+	board->white_pieces[13] = piece_encode(PIECE_PAWN, ROW_2, COL_F, COLOR_WHITE);
+	board->white_pieces[14] = piece_encode(PIECE_PAWN, ROW_2, COL_G, COLOR_WHITE);
+	board->white_pieces[15] = piece_encode(PIECE_PAWN, ROW_2, COL_H, COLOR_WHITE);
+	board->black_pieces[0] = piece_encode(PIECE_ROOK, ROW_8, COL_A, COLOR_BLACK);
+	board->black_pieces[1] = piece_encode(PIECE_KNIGHT, ROW_8, COL_B, COLOR_BLACK);
+	board->black_pieces[2] = piece_encode(PIECE_BISHOP, ROW_8, COL_C, COLOR_BLACK);
+	board->black_pieces[3] = piece_encode(PIECE_QUEEN, ROW_8, COL_D, COLOR_BLACK);
+	board->black_pieces[4] = piece_encode(PIECE_KING, ROW_8, COL_E, COLOR_BLACK);
+	board->black_pieces[5] = piece_encode(PIECE_BISHOP, ROW_8, COL_F, COLOR_BLACK);
+	board->black_pieces[6] = piece_encode(PIECE_KNIGHT, ROW_8, COL_G, COLOR_BLACK);
+	board->black_pieces[7] = piece_encode(PIECE_ROOK, ROW_8, COL_H, COLOR_BLACK);
+	board->black_pieces[8] = piece_encode(PIECE_PAWN, ROW_7, COL_A, COLOR_BLACK);
+	board->black_pieces[9] = piece_encode(PIECE_PAWN, ROW_7, COL_B, COLOR_BLACK);
+	board->black_pieces[10] = piece_encode(PIECE_PAWN, ROW_7, COL_C, COLOR_BLACK);
+	board->black_pieces[11] = piece_encode(PIECE_PAWN, ROW_7, COL_D, COLOR_BLACK);
+	board->black_pieces[12] = piece_encode(PIECE_PAWN, ROW_7, COL_E, COLOR_BLACK);
+	board->black_pieces[13] = piece_encode(PIECE_PAWN, ROW_7, COL_F, COLOR_BLACK);
+	board->black_pieces[14] = piece_encode(PIECE_PAWN, ROW_7, COL_G, COLOR_BLACK);
+	board->black_pieces[15] = piece_encode(PIECE_PAWN, ROW_7, COL_H, COLOR_BLACK);
 	return board;
 }
 
@@ -92,43 +119,35 @@ Board *board_new_game() {
   * 
   */
 void board_print(Board *board) {
-	int i, j, k, piece;
+	int i, j, piece, *array;
+	array = board_pieces_to_array(board);
 	for(i = 0; i < 8; i++) {
 		for(j = 0; j < 8; j++) {
 			printf(" |");
-			for(k = 0; k < board->nb_white_pieces; k++) {
-				piece = board->white_pieces[k];
-				if(7 - i == piece_decode_row(piece) && j == piece_decode_column(piece)) {
-					switch(piece_decode_type(piece)) {
-						case PIECE_PAWN: printf("\u2659"); break;
-						case PIECE_KNIGHT: printf("\u2658"); break;
-						case PIECE_BISHOP: printf("\u2657"); break;
-						case PIECE_ROOK: printf("\u2656"); break;
-						case PIECE_QUEEN: printf("\u2655"); break;
-						case PIECE_KING: printf("\u2654"); break;
-					}
-					break;
-				}
-			}
-			if(k == board->nb_white_pieces) {
-				for(k = 0; k < board->nb_black_pieces; k++) {
-					piece = board->black_pieces[k];
-					if(7 - i == piece_decode_row(piece) && j == piece_decode_column(piece)) {
-						switch(piece_decode_type(piece)) {
-							case PIECE_PAWN: printf("\u265F"); break;
-							case PIECE_KNIGHT: printf("\u265E"); break;
-							case PIECE_BISHOP: printf("\u265D"); break;
-							case PIECE_ROOK: printf("\u265C"); break;
-							case PIECE_QUEEN: printf("\u265B"); break;
-							case PIECE_KING: printf("\u265A"); break;
-						}
-						break;
-					}
-				}
-			}
-			if(k == board->nb_black_pieces)
+			piece = array[i*8+j];
+			if(piece == -1) {
 				printf(" ");
+			} else if(piece_decode_color(piece) == COLOR_WHITE) {
+				switch(piece_decode_type(piece)) {
+					case PIECE_PAWN: printf("\u2659"); break;
+					case PIECE_KNIGHT: printf("\u2658"); break;
+					case PIECE_BISHOP: printf("\u2657"); break;
+					case PIECE_ROOK: printf("\u2656"); break;
+					case PIECE_QUEEN: printf("\u2655"); break;
+					case PIECE_KING: printf("\u2654"); break;
+				}
+			} else {
+				switch(piece_decode_type(piece)) {
+					case PIECE_PAWN: printf("\u265F"); break;
+					case PIECE_KNIGHT: printf("\u265E"); break;
+					case PIECE_BISHOP: printf("\u265D"); break;
+					case PIECE_ROOK: printf("\u265C"); break;
+					case PIECE_QUEEN: printf("\u265B"); break;
+					case PIECE_KING: printf("\u265A"); break;
+				}
+			}
 		}
 		printf(" |\n");
 	}
+	free(array);
 }

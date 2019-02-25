@@ -19,6 +19,7 @@ static const char piece_print_type[] = "PNBRQK";
 static const char piece_print_row[] = "12345678";
 static const char piece_print_column[] = "abcdefgh";
 
+typedef enum Color {COLOR_WHITE, COLOR_BLACK} Color;
 typedef enum Piece {PIECE_PAWN, PIECE_KNIGHT, PIECE_BISHOP, PIECE_ROOK, PIECE_QUEEN, PIECE_KING} Piece;
 typedef enum Row {ROW_1, ROW_2, ROW_3, ROW_4, ROW_5, ROW_6, ROW_7, ROW_8} Row;
 typedef enum Column {COL_A, COL_B, COL_C, COL_D, COL_E, COL_F, COL_G, COL_H} Column;
@@ -33,7 +34,7 @@ typedef enum Column {COL_A, COL_B, COL_C, COL_D, COL_E, COL_F, COL_G, COL_H} Col
   * (type, row, column) as a 32-bits integer.
   * 
   */
-int piece_encode(Piece type, Row row, Column col);
+int piece_encode(Piece type, Row row, Column col, Color color);
 
 /**
   *
@@ -55,6 +56,13 @@ Row piece_decode_row(int piece);
   * 
   */
 Column piece_decode_column(int piece);
+
+/**
+  *
+  * This function returns the color of the piece.
+  * 
+  */
+Color piece_decode_color(int piece);
 
 /**
   *
