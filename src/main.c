@@ -11,12 +11,16 @@
 
 #include <stdio.h>
 #include "board.h"
+#include "engine.h"
 
 
 
 int main(int argc, char **argv) {
 	Board *board = board_new_game();
-	board_print(board);
-	free(board);
+	Stack *stack = stack_alloc();
+	stack_push_state(stack, board);
+	engine_expand(stack->states, stack);
+	stack_print(stack);
+	stack_free(stack);
 	return 0;
 }

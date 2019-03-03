@@ -4,7 +4,7 @@
  * DESCRIPTION: Data structures and functions for storing and manipuling chess boards
  * AUTHORS: José Antonio Riaza Valverde
  *          Miguel Riaza Valverde
- * UPDATED: 25.02.2019
+ * UPDATED: 03.03.2019
  * 
  *H*/
 
@@ -36,7 +36,7 @@ typedef struct Board {
   * to a newly initialized Board struct.
   * 
   **/
-Board *board_alloc(int nb_white_pieces, int nb_black_pieces);
+Board *board_alloc(short nb_white_pieces, short nb_black_pieces);
 
 /**
   * 
@@ -54,6 +54,28 @@ void board_free(Board *board);
   *  
   **/
 short *board_pieces_to_array(Board *board);
+
+/**
+  *
+  * This function checks if a piece is in the board.
+  *  
+  **/
+int board_piece_in_array(short *pieces, Row row, Column column);
+
+/**
+  *
+  * This function returns a piece from a board.
+  *  
+  **/
+short board_piece_from_array(short *pieces, Row row, Column column);
+
+/**
+  *
+  * This function returns a new board after
+  * moving a piece. 
+  * 
+  **/
+Board *board_perform_movement(Board *board, short from, short to, int capture);
 
 /**
   * 

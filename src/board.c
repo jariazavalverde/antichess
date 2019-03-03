@@ -4,7 +4,7 @@
  * DESCRIPTION: Data structures and functions for storing and manipuling chess boards
  * AUTHORS: José Antonio Riaza Valverde
  *          Miguel Riaza Valverde
- * UPDATED: 25.02.2019
+ * UPDATED: 03.03.2019
  * 
  *H*/
 
@@ -18,7 +18,7 @@
   * to a newly initialized Board struct.
   * 
   **/
-Board *board_alloc(int nb_white_pieces, int nb_black_pieces) {
+Board *board_alloc(short nb_white_pieces, short nb_black_pieces) {
 	Board *board = malloc(sizeof(Board));
 	board->white_pieces = malloc(nb_white_pieces*sizeof(short));
 	board->black_pieces = malloc(nb_black_pieces*sizeof(short));
@@ -50,7 +50,7 @@ void board_free(Board *board) {
   **/
 short *board_pieces_to_array(Board *board) {
 	int i, j, k;
-	short piece, *array = malloc(64*sizeof(int));
+	short piece, *array = malloc(64*sizeof(short));
 	for(i = 0; i < 8; i++) {
 		for(j = 0; j < 8; j++) {
 			for(k = 0; k < board->nb_white_pieces; k++) {
@@ -74,6 +74,69 @@ short *board_pieces_to_array(Board *board) {
 		}
 	}
 	return array;
+}
+
+/**
+  *
+  * This function checks if a piece is in the board.
+  *  
+  **/
+int board_piece_in_array(short *pieces, Row row, Column column) {
+	return row >= ROW_1 && row <= ROW_8 && column >= COL_A && column <= COL_H && pieces[row*8+column] != -1;
+}
+
+/**
+  *
+  * This function returns a piece from a board.
+  *  
+  **/
+short board_piece_from_array(short *pieces, Row row, Column column) {
+	if(row >= ROW_1 && row <= ROW_8 && column >= COL_A && column <= COL_H)
+		return pieces[row*8+column];
+	return -1;
+}
+
+/**
+  *
+  * This function returns a new board after
+  * moving a piece. 
+  * 
+  **/
+Board *board_perform_movement(Board *board, short from, short to, int capture) {
+	Color color;
+	int i, j, nb_white_pieces, nb_black_pieces;
+	Row row;
+	Column column;
+	Board *new_board;
+	color = board->turn;
+	nb_white_pieces = color == COLOR_WHITE || !capture ? board->nb_white_pieces : board->nb_white_pieces-1;
+	nb_black_pieces = color == COLOR_BLACK || !capture ? board->nb_black_pieces : board->nb_black_pieces-1;
+	new_board = board_alloc(nb_white_pieces, nb_black_pieces);
+	new_board->turn = COLOR_BLACK - color;
+	new_board->movement = color == COLOR_BLACK ? board->movement+1 : board->movement;
+	row = piece_decode_row(to);
+	column = piece_decode_column(to);
+	j = 0;
+	for(i = 0; i < board->nb_white_pieces; i++) {
+		if(from == board->white_pieces[i]) {
+			new_board->white_pieces[j] = to;
+			j++;
+		} else if(piece_decode_row(board->white_pieces[i]) != row || piece_decode_column(board->white_pieces[i]) != column) {
+			new_board->white_pieces[j] = board->white_pieces[i];
+			j++;
+		}
+	}
+	j = 0;
+	for(i = 0; i < board->nb_black_pieces; i++) {
+		if(from == board->black_pieces[i]) {
+			new_board->black_pieces[j] = to;
+			j++;
+		} else if(piece_decode_row(board->black_pieces[i]) != row || piece_decode_column(board->black_pieces[i]) != column) {
+			new_board->black_pieces[j] = board->black_pieces[i];
+			j++;
+		}
+	}
+	return new_board;
 }
 
 /**
