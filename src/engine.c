@@ -329,8 +329,46 @@ State *engine_expand(Board *board) {
 					}
 				}
 				break;
+			// k = 0 -> r+ c+
+			// k = 1 -> r+ c-
+			// k = 2 -> r- c+
+			// k = 3 -> r- c-
+			// k = 4 -> r+ c
+			// k = 5 -> r- c
+			// k = 6 -> r c+
+			// k = 7 -> r c-
 			case PIECE_QUEEN:
-
+				for(k = 0; k < 8; k++) {
+					for(j = 1; j < 8; j++) {
+						piece = board_piece_from_array(array,
+							k < 2 || k == 4 ? row+j : k < 4 || k == 5 ? row-j : row,
+							k >= 4 == 0 && k < 6 ? column : k % 2 == 0 ? column+j : column-j);
+						if(piece == -2) {
+							break;
+						} else if(piece >= 0) {
+							if(piece_decode_color(piece) != color) {
+								if(!capture) nb_actions = 0;
+								capture = 1;
+								actions[nb_actions].from = pieces[i];
+								actions[nb_actions].to = piece_encode(PIECE_QUEEN,
+									k < 2 || k == 4 ? row+j : k < 4 || k == 5 ? row-j : row,
+									k >= 4 == 0 && k < 6 ? column : k % 2 == 0 ? column+j : column-j,
+									color);
+								nb_actions++;
+							} else {
+								break;
+							}
+							break;
+						} else if(!capture) {
+							actions[nb_actions].from = pieces[i];
+							actions[nb_actions].to = piece_encode(PIECE_QUEEN,
+								k < 2 || k == 4 ? row+j : k < 4 || k == 5 ? row-j : row,
+								k >= 4 == 0 && k < 6 ? column : k % 2 == 0 ? column+j : column-j,
+								color);
+							nb_actions++;
+						}
+					}
+				}
 				break;
 			case PIECE_KING:
 				for(j = -1; j <= 1; j++) {
