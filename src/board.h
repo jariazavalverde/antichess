@@ -17,6 +17,12 @@
 #ifndef ANTICHESS_BOARD_H
 #define ANTICHESS_BOARD_H
 
+typedef struct Action {
+	short from;
+	short to;
+  int capture;
+} Action;
+
 typedef struct Board {
 	short *white_pieces;
 	short *black_pieces;
@@ -24,6 +30,8 @@ typedef struct Board {
 	short nb_black_pieces;
 	int movement;
 	Color turn;
+  Action last_action;
+  int score;
 } Board;
 
 #endif

@@ -24,8 +24,11 @@ Board *board_alloc(short nb_white_pieces, short nb_black_pieces) {
 	board->black_pieces = malloc(nb_black_pieces*sizeof(short));
 	board->nb_white_pieces = nb_white_pieces;
 	board->nb_black_pieces = nb_black_pieces;
-	board->movement = 0;
+	board->movement = 1;
 	board->turn = COLOR_WHITE;
+	board->last_action.from = -1;
+	board->last_action.to = -1;
+	board->last_action.capture = 0;
 	return board;
 }
 
@@ -49,27 +52,30 @@ void board_free(Board *board) {
   *  
   **/
 short *board_pieces_to_array(Board *board) {
-	int i, j, k;
+	int i, j, k, match;
 	short piece, *array = malloc(64*sizeof(short));
 	for(i = 0; i < 8; i++) {
 		for(j = 0; j < 8; j++) {
+			match = 0;
 			for(k = 0; k < board->nb_white_pieces; k++) {
 				piece = board->white_pieces[k];
-				if(7 - i == piece_decode_row(piece) && j == piece_decode_column(piece)) {
+				if(i == piece_decode_row(piece) && j == piece_decode_column(piece)) {
 					array[i*8+j] = piece;
+					match = 1;
 					break;
 				}
 			}
-			if(k == board->nb_white_pieces) {
+			if(!match) {
 				for(k = 0; k < board->nb_black_pieces; k++) {
 					piece = board->black_pieces[k];
-					if(7 - i == piece_decode_row(piece) && j == piece_decode_column(piece)) {
+					if(i == piece_decode_row(piece) && j == piece_decode_column(piece)) {
 						array[i*8+j] = piece;
+						match = 1;
 						break;
 					}
 				}
 			}
-			if(k == board->nb_black_pieces)
+			if(!match)
 				array[i*8+j] = -1;
 		}
 	}
@@ -112,8 +118,11 @@ Board *board_perform_movement(Board *board, short from, short to, int capture) {
 	nb_white_pieces = color == COLOR_WHITE || !capture ? board->nb_white_pieces : board->nb_white_pieces-1;
 	nb_black_pieces = color == COLOR_BLACK || !capture ? board->nb_black_pieces : board->nb_black_pieces-1;
 	new_board = board_alloc(nb_white_pieces, nb_black_pieces);
-	new_board->turn = COLOR_BLACK - color;
+	new_board->turn = color == COLOR_WHITE ? COLOR_BLACK : COLOR_WHITE;
 	new_board->movement = color == COLOR_BLACK ? board->movement+1 : board->movement;
+	new_board->last_action.from = from;
+	new_board->last_action.to = to;
+	new_board->last_action.capture = capture;
 	row = piece_decode_row(to);
 	column = piece_decode_column(to);
 	j = 0;
@@ -196,9 +205,12 @@ void board_print(Board *board) {
 	for(i = 0; i < 8; i++) {
 		for(j = 0; j < 8; j++) {
 			printf(" |");
-			piece_print(pieces[i*8+j]);
+			piece_print(pieces[(7-i)*8+j]);
 		}
 		printf(" |\n");
 	}
 	free(pieces);
+	printf("(:turn %d :movement %s)\n",
+		board->movement,
+		board->turn == COLOR_WHITE ? "white" : "black");
 }

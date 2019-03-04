@@ -4,11 +4,12 @@
  * DESCRIPTION: Antichess engine
  * AUTHORS: José Antonio Riaza Valverde
  *          Miguel Riaza Valverde
- * UPDATED: 03.03.2019
+ * UPDATED: 04.03.2019
  * 
  *H*/
 
 #include <stdio.h>
+#include <math.h>
 #include "piece.h"
 #include "board.h"
 
@@ -17,20 +18,10 @@
 #ifndef ANTICHESS_ENGINE_H
 #define ANTICHESS_ENGINE_H
 
-typedef struct Action {
-    short from;
-    short to;
-} Action;
-
 typedef struct State {
-    Board *board;
-    struct State *next;
+	Board **boards;
+	int nb_boards;
 } State;
-
-typedef struct Stack {
-    State *states;
-    int nb_states;
-} Stack;
 
 #endif
 
@@ -38,34 +29,18 @@ typedef struct Stack {
 
 /**
   * 
-  * This function creates a board, returning a pointer
-  * to a newly initialized Board struct.
+  * This function returns the best movement for
+  * a given position.
   * 
   **/
-Stack *stack_alloc();
+Action *engine_best_movement(Board *board, int max_depth);
 
 /**
   * 
-  * This function frees a previously allocated stack.
-  * The boards and states underlying the board will
-  * be deallocated.
+  * This function ...
   * 
   **/
-void stack_free(Stack *stack);
-
-/**
-  *
-  * This function pushes a new board into an stack.
-  * 
-  **/
-void stack_push_state(Stack *stack, Board *board);
-
-/**
-  *
-  * This function prints an stack for the standard output.
-  * 
-  **/
-void stack_print(Stack *stack);
+Board *engine_minimax(Board *board, Color color, int alpha, int beta, int max_depth);
 
 /**
   * 
@@ -73,7 +48,7 @@ void stack_print(Stack *stack);
   * given player.
   * 
   **/
-int engine_score_board(State *state);
+int engine_score_board(Board *board);
 
 /**
   * 
@@ -81,4 +56,4 @@ int engine_score_board(State *state);
   * given player.
   * 
   **/
-int engine_expand(State *state, Stack *stack);
+State *engine_expand(Board *board);

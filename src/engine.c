@@ -4,7 +4,7 @@
  * DESCRIPTION: Antichess engine
  * AUTHORS: José Antonio Riaza Valverde
  *          Miguel Riaza Valverde
- * UPDATED: 03.03.2019
+ * UPDATED: 04.03.2019
  * 
  *H*/
 
@@ -14,60 +14,84 @@
 
 /**
   * 
-  * This function creates a board, returning a pointer
-  * to a newly initialized Board struct.
+  * This function returns the best movement for
+  * a given position.
   * 
   **/
-Stack *stack_alloc() {
-	Stack *stack = malloc(sizeof(Stack));
-	stack->states = NULL;
-	stack->nb_states = 0;
-	return stack;
+Action *engine_best_movement(Board *board, int max_depth) {
+	Board *best;
+	Action *action;
+	best = engine_minimax(board, board->turn, -999, 999, max_depth);
+	if(best == NULL)
+		return NULL;
+	action = malloc(sizeof(Action));
+	action->from = best->last_action.from;
+	action->to = best->last_action.to;
+	action->capture = best->last_action.capture;
+	board_free(best);
+	return action;
 }
 
 /**
   * 
-  * This function frees a previously allocated stack.
-  * The boards and states underlying the board will
-  * be deallocated.
+  * This function ...
   * 
   **/
-void stack_free(Stack *stack) {
-	State *state = stack->states, *next;
-	while(state != NULL) {
-		board_free(state->board);
-		next = state->next;
+Board *engine_minimax(Board *board, Color color, int alpha, int beta, int max_depth) {
+	int i;
+	State *state;
+	Board *new_board, *best = NULL;
+	if(max_depth == 0) {
+		board->score = engine_score_board(board);
+		return board;
+	}
+	state = engine_expand(board);
+	if(state->nb_boards == 0) {
+		board->score = engine_score_board(board);
+		free(state->boards);
 		free(state);
-		state = next;
+		return board;
 	}
-	free(stack);
-}
-
-/**
-  *
-  * This function pushes a new board into an stack.
-  * 
-  **/
-void stack_push_state(Stack *stack, Board *board) {
-	State *state = malloc(sizeof(State));
-	state->board = board;
-	state->next = stack->states;
-	stack->states = state;
-	stack->nb_states++;
-}
-
-/**
-  *
-  * This function prints an stack for the standard output.
-  * 
-  **/
-void stack_print(Stack *stack) {
-	State *state = stack->states;
-	while(state != NULL) {
-		board_print(state->board);
-		printf("\n");
-		state = state->next;
+	if(board->turn == color) {
+		for(i = 0; i < state->nb_boards; i++) {
+			if(beta > alpha) {
+				new_board = engine_minimax(state->boards[i], color, alpha, beta, max_depth-1);
+				if(best == NULL || new_board->score > alpha) {
+					alpha = new_board->score;
+					if(best != NULL) {
+						board_free(best);
+					}
+					best = state->boards[i];
+				} else {
+					board_free(state->boards[i]);
+				}
+			} else {
+				board_free(state->boards[i]);
+			}
+		}
+		best->score = alpha;
+	} else {
+		for(i = 0; i < state->nb_boards; i++) {
+			if(beta > alpha) {
+				new_board = engine_minimax(state->boards[i], color, alpha, beta, max_depth-1);
+				if(best == NULL || new_board->score < beta) {
+					beta = new_board->score;
+					if(best != NULL) {
+						board_free(best);
+					}
+					best = state->boards[i];
+				} else {
+					board_free(state->boards[i]);
+				}
+			} else {
+				board_free(state->boards[i]);
+			}
+		}
+		best->score = beta;
 	}
+	free(state->boards);
+	free(state);
+	return best;
 }
 
 /**
@@ -76,23 +100,22 @@ void stack_print(Stack *stack) {
   * given player.
   * 
   **/
-int engine_score_board(State *state) {
-	Board *board;
+int engine_score_board(Board *board) {
 	Color color;
 	int i, score;
 	short *pieces, nb_pieces;
-	board = state->board;
+	color = board->turn;
 	pieces = color == COLOR_WHITE ? board->white_pieces : board->black_pieces;
 	nb_pieces = color == COLOR_WHITE ? board->nb_white_pieces : board->nb_black_pieces;
-	color = board->turn;
+	score = 0;
 	for(i = 0; i < nb_pieces; i++) {
 		switch(piece_decode_type(pieces[i])) {
-			case PIECE_PAWN: score += 1; break;
-			case PIECE_KNIGHT: score += 3; break;
-			case PIECE_BISHOP: score += 3; break;
-			case PIECE_ROOK: score += 5; break;
-			case PIECE_QUEEN: score += 9; break;
-			case PIECE_KING: score += 1; break;
+			case PIECE_PAWN: score -= 1; break;
+			case PIECE_KNIGHT: score -= 3; break;
+			case PIECE_BISHOP: score -= 3; break;
+			case PIECE_ROOK: score -= 5; break;
+			case PIECE_QUEEN: score -= 9; break;
+			case PIECE_KING: score -= 2; break;
 		}
 	}
 	return score;
@@ -104,19 +127,18 @@ int engine_score_board(State *state) {
   * given player.
   * 
   **/
-int engine_expand(State *state, Stack *stack) {
+State *engine_expand(Board *board) {
 	Color color;
 	short *pieces, *array, nb_pieces, piece;
 	int i, nb_actions, capture, row, column;
+	State *state;
 	Action *actions;
-	Board *board;
-	board = state->board;
 	color = board->turn;
 	pieces = color == COLOR_WHITE ? board->white_pieces : board->black_pieces;
 	nb_pieces = color == COLOR_WHITE ? board->nb_white_pieces : board->nb_black_pieces;
 	array = board_pieces_to_array(board);
-	nb_actions = 0;
 	actions = malloc(218*sizeof(Action));
+	nb_actions = 0;
 	capture = 0;
 	// Get possible movements
 	for(i = 0; i < nb_pieces; i++) {
@@ -195,10 +217,13 @@ int engine_expand(State *state, Stack *stack) {
 		}
 	}
 	// Push states into the stack
+	state = malloc(sizeof(State));
+	state->boards = malloc(nb_actions*sizeof(Board*));
+	state->nb_boards = nb_actions;
 	for(i = 0; i < nb_actions; i++) {
-		stack_push_state(stack, board_perform_movement(board, actions[i].from, actions[i].to, capture));
+		state->boards[i] = board_perform_movement(board, actions[i].from, actions[i].to, capture);
 	}
 	free(actions);
 	free(array);
-	return nb_actions;
+	return state;
 }
