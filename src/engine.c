@@ -264,7 +264,37 @@ State *engine_expand(Board *board) {
 				}
 				break;
 			case PIECE_BISHOP:
-
+				for(k = 0; k < 4; k++) {
+					for(j = 1; j < 8; j++) {
+						piece = board_piece_from_array(array,
+							k < 2 ? row+j : row-j,
+							k % 2 == 0 ? column+j : column-j);
+						if(piece == -2) {
+							break;
+						} else if(piece >= 0) {
+							if(piece_decode_color(piece) != color) {
+								if(!capture) nb_actions = 0;
+								capture = 1;
+								actions[nb_actions].from = pieces[i];
+								actions[nb_actions].to = piece_encode(PIECE_BISHOP,
+									k < 2 ? row+j : row-j,
+									k % 2 == 0 ? column+j : column-j,
+									color);
+								nb_actions++;
+							} else {
+								break;
+							}
+							break;
+						} else if(!capture) {
+							actions[nb_actions].from = pieces[i];
+							actions[nb_actions].to = piece_encode(PIECE_BISHOP,
+								k < 2 ? row+j : row-j,
+								k % 2 == 0 ? column+j : column-j,
+								color);
+							nb_actions++;
+						}
+					}
+				}
 				break;
 			case PIECE_ROOK:
 				for(k = 0; k < 4; k++) {
