@@ -48,7 +48,7 @@ Board *engine_minimax(Board *board, Color color, int alpha, int beta, int max_de
   * given player.
   * 
   **/
-int engine_score_board(Board *board);
+int engine_score_board(Board *board, Color color);
 
 /**
   * 

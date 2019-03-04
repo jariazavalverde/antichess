@@ -42,12 +42,12 @@ Board *engine_minimax(Board *board, Color color, int alpha, int beta, int max_de
 	State *state;
 	Board *new_board, *best = NULL;
 	if(max_depth == 0) {
-		board->score = engine_score_board(board);
+		board->score = engine_score_board(board, color);
 		return board;
 	}
 	state = engine_expand(board);
 	if(state->nb_boards == 0) {
-		board->score = engine_score_board(board);
+		board->score = engine_score_board(board, color);
 		free(state->boards);
 		free(state);
 		return board;
@@ -100,11 +100,9 @@ Board *engine_minimax(Board *board, Color color, int alpha, int beta, int max_de
   * given player.
   * 
   **/
-int engine_score_board(Board *board) {
-	Color color;
+int engine_score_board(Board *board, Color color) {
 	int i, score;
 	short *pieces, nb_pieces;
-	color = board->turn;
 	pieces = color == COLOR_WHITE ? board->white_pieces : board->black_pieces;
 	nb_pieces = color == COLOR_WHITE ? board->nb_white_pieces : board->nb_black_pieces;
 	score = 0;
@@ -116,6 +114,18 @@ int engine_score_board(Board *board) {
 			case PIECE_ROOK: score -= 5; break;
 			case PIECE_QUEEN: score -= 9; break;
 			case PIECE_KING: score -= 2; break;
+		}
+	}
+	pieces = color == COLOR_WHITE ? board->black_pieces : board->white_pieces;
+	nb_pieces = color == COLOR_WHITE ? board->nb_black_pieces : board->nb_white_pieces;
+	for(i = 0; i < nb_pieces; i++) {
+		switch(piece_decode_type(pieces[i])) {
+			case PIECE_PAWN: score += 1; break;
+			case PIECE_KNIGHT: score += 3; break;
+			case PIECE_BISHOP: score += 3; break;
+			case PIECE_ROOK: score += 5; break;
+			case PIECE_QUEEN: score += 9; break;
+			case PIECE_KING: score += 2; break;
 		}
 	}
 	return score;
@@ -232,7 +242,26 @@ State *engine_expand(Board *board) {
 				}
 				break;
 			case PIECE_KNIGHT:
-
+				for(j = -2; j <= 2; j++) {
+					for(k = -2; k <= 2; k++) {
+						if(j != 0 && k != 0 && abs(j) != abs(k)) {
+							piece = board_piece_from_array(array, row+j, column+k);
+							if(piece >= 0) {
+								if(piece_decode_color(piece) != color) {
+									if(!capture) nb_actions = 0;
+									capture = 1;
+									actions[nb_actions].from = pieces[i];
+									actions[nb_actions].to = piece_encode(PIECE_KNIGHT, row+j, column+k, color);
+									nb_actions++;
+								}
+							} else if(!capture && piece == -1) {
+								actions[nb_actions].from = pieces[i];
+								actions[nb_actions].to = piece_encode(PIECE_KNIGHT, row+j, column+k, color);
+								nb_actions++;
+							}
+						}
+					}
+				}
 				break;
 			case PIECE_BISHOP:
 
