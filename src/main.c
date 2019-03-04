@@ -19,10 +19,15 @@ int main(int argc, char **argv) {
 	int max_depth;
 	Board *board = board_new_game(), *next;
 	board_print(board);
+	if(argc > 1) {
+		max_depth = atoi(argv[1]);
+	}
 	while(1) {
-		scanf("%d", &max_depth);
-		if(max_depth == 0)
-			break;
+		if(argc == 1) {
+			scanf("%d", &max_depth);
+			if(max_depth == 0)
+				break;
+		}
 		Action *action = engine_best_movement(board, max_depth);
 		if(action != NULL) {
 			next = board_perform_movement(board, action->from, action->to, action->capture);
