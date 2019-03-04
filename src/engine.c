@@ -130,7 +130,7 @@ int engine_score_board(Board *board) {
 State *engine_expand(Board *board) {
 	Color color;
 	short *pieces, *array, nb_pieces, piece;
-	int i, nb_actions, capture, row, column;
+	int i, j, k, nb_actions, capture, row, column;
 	State *state;
 	Action *actions;
 	color = board->turn;
@@ -148,37 +148,69 @@ State *engine_expand(Board *board) {
 			case PIECE_PAWN:
 				if(color == COLOR_WHITE) {
 					piece = board_piece_from_array(array, row+1, column+1);
-					if(piece != -1 && piece_decode_color(piece) != color) {
+					if(piece >= 0 && piece_decode_color(piece) != color) {
 						if(!capture) nb_actions = 0;
 						capture = 1;
-						actions[nb_actions].from = pieces[i];
-						actions[nb_actions].to = piece_encode(PIECE_PAWN, row+1, column+1, color);
-						nb_actions++;
+						if(row == ROW_7) {
+							for(j = PIECE_KNIGHT; j <= PIECE_KING; j++) {
+								actions[nb_actions].from = pieces[i];
+								actions[nb_actions].to = piece_encode(j, row+1, column+1, color);
+								nb_actions++;
+							}
+						} else {
+							actions[nb_actions].from = pieces[i];
+							actions[nb_actions].to = piece_encode(PIECE_PAWN, row+1, column+1, color);
+							nb_actions++;
+						}
 					}
 					piece = board_piece_from_array(array, row+1, column-1);
-					if(piece != -1 && piece_decode_color(piece) != color) {
+					if(piece >= 0 && piece_decode_color(piece) != color) {
 						if(!capture) nb_actions = 0;
 						capture = 1;
-						actions[nb_actions].from = pieces[i];
-						actions[nb_actions].to = piece_encode(PIECE_PAWN, row+1, column-1, color);
-						nb_actions++;
+						if(row == ROW_7) {
+							for(j = PIECE_KNIGHT; j <= PIECE_KING; j++) {
+								actions[nb_actions].from = pieces[i];
+								actions[nb_actions].to = piece_encode(j, row+1, column-1, color);
+								nb_actions++;
+							}
+						} else {
+							actions[nb_actions].from = pieces[i];
+							actions[nb_actions].to = piece_encode(PIECE_PAWN, row+1, column-1, color);
+							nb_actions++;
+						}
 					}
 				} else {
 					piece = board_piece_from_array(array, row-1, column+1);
-					if(piece != -1 && piece_decode_color(piece) != color) {
+					if(piece >= 0 && piece_decode_color(piece) != color) {
 						if(!capture) nb_actions = 0;
-						actions[nb_actions].from = pieces[i];
-						actions[nb_actions].to = piece_encode(PIECE_PAWN, row-1, column+1, color);
 						capture = 1;
-						nb_actions++;
+						if(row == ROW_2) {
+							for(j = PIECE_KNIGHT; j <= PIECE_KING; j++) {
+								actions[nb_actions].from = pieces[i];
+								actions[nb_actions].to = piece_encode(j, row-1, column+1, color);
+								nb_actions++;
+							}
+						} else {
+							actions[nb_actions].from = pieces[i];
+							actions[nb_actions].to = piece_encode(PIECE_PAWN, row-1, column+1, color);
+							nb_actions++;
+						}
 					}
 					piece = board_piece_from_array(array, row-1, column-1);
-					if(piece != -1 && piece_decode_color(piece) != color) {
+					if(piece >= 0 && piece_decode_color(piece) != color) {
 						if(!capture) nb_actions = 0;
-						actions[nb_actions].from = pieces[i];
-						actions[nb_actions].to = piece_encode(PIECE_PAWN, row-1, column-1, color);
 						capture = 1;
-						nb_actions++;
+						if(row == ROW_2) {
+							for(j = PIECE_KNIGHT; j <= PIECE_KING; j++) {
+								actions[nb_actions].from = pieces[i];
+								actions[nb_actions].to = piece_encode(j, row-1, column-1, color);
+								nb_actions++;
+							}
+						} else {
+							actions[nb_actions].from = pieces[i];
+							actions[nb_actions].to = piece_encode(PIECE_PAWN, row-1, column-1, color);
+							nb_actions++;
+						}
 					}
 				}
 				if(!capture) {
@@ -212,7 +244,26 @@ State *engine_expand(Board *board) {
 
 				break;
 			case PIECE_KING:
-
+				for(j = -1; j <= 1; j++) {
+					for(k = -1; k <= 1; k++) {
+						if(j != 0 || k != 0) {
+							piece = board_piece_from_array(array, row+j, column+k);
+							if(piece >= 0) {
+								if(piece_decode_color(piece) != color) {
+									if(!capture) nb_actions = 0;
+									capture = 1;
+									actions[nb_actions].from = pieces[i];
+									actions[nb_actions].to = piece_encode(PIECE_KING, row+j, column+k, color);
+									nb_actions++;
+								}
+							} else if(!capture && piece == -1) {
+								actions[nb_actions].from = pieces[i];
+								actions[nb_actions].to = piece_encode(PIECE_KING, row+j, column+k, color);
+								nb_actions++;
+							}
+						}
+					}
+				}
 				break;
 		}
 	}

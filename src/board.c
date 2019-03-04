@@ -99,7 +99,7 @@ int board_piece_in_array(short *pieces, Row row, Column column) {
 short board_piece_from_array(short *pieces, Row row, Column column) {
 	if(row >= ROW_1 && row <= ROW_8 && column >= COL_A && column <= COL_H)
 		return pieces[row*8+column];
-	return -1;
+	return -2;
 }
 
 /**
