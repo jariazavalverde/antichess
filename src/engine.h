@@ -40,7 +40,7 @@ Action *engine_best_movement(Board *board, int max_depth);
   * This function ...
   * 
   **/
-Board *engine_minimax(Board *board, Color color, int alpha, int beta, int max_depth);
+Board *engine_minimax(Board *board, Color color, int alpha, int beta, int max_depth, int current_depth);
 
 /**
   * 

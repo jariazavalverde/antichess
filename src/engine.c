@@ -21,7 +21,7 @@
 Action *engine_best_movement(Board *board, int max_depth) {
 	Board *best;
 	Action *action;
-	best = engine_minimax(board, board->turn, -999, 999, max_depth);
+	best = engine_minimax(board, board->turn, -999, 999, max_depth, max_depth);
 	if(best == NULL)
 		return NULL;
 	action = malloc(sizeof(Action));
@@ -37,25 +37,28 @@ Action *engine_best_movement(Board *board, int max_depth) {
   * This function ...
   * 
   **/
-Board *engine_minimax(Board *board, Color color, int alpha, int beta, int max_depth) {
+Board *engine_minimax(Board *board, Color color, int alpha, int beta, int max_depth, int current_depth) {
 	int i;
 	State *state;
 	Board *new_board, *best = NULL;
-	if(max_depth == 0) {
+	if(current_depth == 0) {
 		board->score = engine_score_board(board, color);
 		return board;
 	}
 	state = engine_expand(board);
 	if(state->nb_boards == 0) {
-		board->score = engine_score_board(board, color);
 		free(state->boards);
 		free(state);
+		if(max_depth == current_depth) {
+			return NULL;
+		}
+		board->score = engine_score_board(board, color);
 		return board;
 	}
 	if(board->turn == color) {
 		for(i = 0; i < state->nb_boards; i++) {
 			if(beta > alpha) {
-				new_board = engine_minimax(state->boards[i], color, alpha, beta, max_depth-1);
+				new_board = engine_minimax(state->boards[i], color, alpha, beta, max_depth, current_depth-1);
 				if(best == NULL || new_board->score > alpha) {
 					alpha = new_board->score;
 					if(best != NULL) {
@@ -73,7 +76,7 @@ Board *engine_minimax(Board *board, Color color, int alpha, int beta, int max_de
 	} else {
 		for(i = 0; i < state->nb_boards; i++) {
 			if(beta > alpha) {
-				new_board = engine_minimax(state->boards[i], color, alpha, beta, max_depth-1);
+				new_board = engine_minimax(state->boards[i], color, alpha, beta, max_depth, current_depth-1);
 				if(best == NULL || new_board->score < beta) {
 					beta = new_board->score;
 					if(best != NULL) {
@@ -228,19 +231,43 @@ State *engine_expand(Board *board) {
 					}
 				}
 				if(!capture) {
-					if(color == COLOR_WHITE) {
-						piece = board_piece_from_array(array, row+1, column);
-						if(piece == -1) {
-							actions[nb_actions].from = pieces[i];
-							actions[nb_actions].to = piece_encode(PIECE_PAWN, row+1, column, color);
-							nb_actions++;
-						}
-					} else {
-						piece = board_piece_from_array(array, row-1, column);
-						if(piece == -1) {
-							actions[nb_actions].from = pieces[i];
-							actions[nb_actions].to = piece_encode(PIECE_PAWN, row-1, column, color);
-							nb_actions++;
+					for(j = 1; j <= 2; j++) {
+						if(j == 2 && (color == COLOR_WHITE && row != ROW_2 || color == COLOR_BLACK && row != ROW_7))
+							break;
+						if(color == COLOR_WHITE) {
+							piece = board_piece_from_array(array, row+j, column);
+							if(piece == -1) {
+								if(row == ROW_7) {
+									for(k = PIECE_KNIGHT; k <= PIECE_KING; k++) {
+										actions[nb_actions].from = pieces[i];
+										actions[nb_actions].to = piece_encode(k, row+j, column, color);
+										nb_actions++;
+									}
+								} else {
+									actions[nb_actions].from = pieces[i];
+									actions[nb_actions].to = piece_encode(PIECE_PAWN, row+j, column, color);
+									nb_actions++;
+								}
+							} else {
+								break;
+							}
+						} else {
+							piece = board_piece_from_array(array, row-j, column);
+							if(piece == -1) {
+								if(row == ROW_2) {
+									for(k = PIECE_KNIGHT; k <= PIECE_KING; k++) {
+										actions[nb_actions].from = pieces[i];
+										actions[nb_actions].to = piece_encode(k, row-j, column, color);
+										nb_actions++;
+									}
+								} else {
+									actions[nb_actions].from = pieces[i];
+									actions[nb_actions].to = piece_encode(PIECE_PAWN, row-j, column, color);
+									nb_actions++;
+								}
+							} else {
+								break;
+							}
 						}
 					}
 				}
