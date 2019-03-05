@@ -105,6 +105,8 @@ int engine_score_board(Board *board, Color color) {
 	short *pieces, nb_pieces;
 	pieces = color == COLOR_WHITE ? board->white_pieces : board->black_pieces;
 	nb_pieces = color == COLOR_WHITE ? board->nb_white_pieces : board->nb_black_pieces;
+	if(nb_pieces == 0)
+		return 999;
 	score = 0;
 	for(i = 0; i < nb_pieces; i++) {
 		switch(piece_decode_type(pieces[i])) {
@@ -118,6 +120,8 @@ int engine_score_board(Board *board, Color color) {
 	}
 	pieces = color == COLOR_WHITE ? board->black_pieces : board->white_pieces;
 	nb_pieces = color == COLOR_WHITE ? board->nb_black_pieces : board->nb_white_pieces;
+	if(nb_pieces == 0)
+		return -999;
 	for(i = 0; i < nb_pieces; i++) {
 		switch(piece_decode_type(pieces[i])) {
 			case PIECE_PAWN: score += 1; break;
@@ -342,7 +346,7 @@ State *engine_expand(Board *board) {
 					for(j = 1; j < 8; j++) {
 						piece = board_piece_from_array(array,
 							k < 2 || k == 4 ? row+j : k < 4 || k == 5 ? row-j : row,
-							k >= 4 == 0 && k < 6 ? column : k % 2 == 0 ? column+j : column-j);
+							k == 4 || k == 5 ? column : k % 2 == 0 ? column+j : column-j);
 						if(piece == -2) {
 							break;
 						} else if(piece >= 0) {
@@ -352,18 +356,16 @@ State *engine_expand(Board *board) {
 								actions[nb_actions].from = pieces[i];
 								actions[nb_actions].to = piece_encode(PIECE_QUEEN,
 									k < 2 || k == 4 ? row+j : k < 4 || k == 5 ? row-j : row,
-									k >= 4 == 0 && k < 6 ? column : k % 2 == 0 ? column+j : column-j,
+									k == 4 || k == 5 ? column : k % 2 == 0 ? column+j : column-j,
 									color);
 								nb_actions++;
-							} else {
-								break;
 							}
 							break;
 						} else if(!capture) {
 							actions[nb_actions].from = pieces[i];
 							actions[nb_actions].to = piece_encode(PIECE_QUEEN,
 								k < 2 || k == 4 ? row+j : k < 4 || k == 5 ? row-j : row,
-								k >= 4 == 0 && k < 6 ? column : k % 2 == 0 ? column+j : column-j,
+								k == 4 || k == 5 ? column : k % 2 == 0 ? column+j : column-j,
 								color);
 							nb_actions++;
 						}
